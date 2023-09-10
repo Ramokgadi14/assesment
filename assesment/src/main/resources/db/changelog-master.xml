@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+
+
+    <!-- Create the Investor table -->
+    <changeSet id="createInvestorTable" author="Johannes">
+
+        <preConditions onFail="MARK_RAN">
+            <!-- Check if the table exists -->
+            <not>
+                <tableExists tableName="investor"/>
+                <tableExists tableName="product"/>
+                <tableExists tableName="withdrawal"/>
+            </not>
+        </preConditions>
+        <createTable tableName="investor">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="surname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(10)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="date_of_birth" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="product">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="balance" type="DOUBLE PRECISION">
+                <constraints nullable="false"/>
+            </column>
+            <column name="investor_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_investor" references="investor(id)"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="withdrawal">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="withdrawal_amount" type="DOUBLE PRECISION">
+                <constraints nullable="false"/>
+            </column>
+            <column name="withdrawal_date_time" type="TIMESTAMP"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="investor_id" type="BIGINT">
+                <constraints nullable="true" references="investor(id)" foreignKeyName="fk_investor_withdrawal"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_product_withdrawal" references="product(id)"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="audit_trail">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="BIGINT"/>
+            <column name="investor_id" type="BIGINT"/>
+            <column name="withdrawal_id" type="BIGINT"/>
+            <column name="withdrawal_status" type="VARCHAR(255)"/>
+            <column name="withdrawal_amount" type="DOUBLE"/>
+            <column name="product_previous_balance" type="DOUBLE"/>
+            <column name="product_new_balance" type="DOUBLE"/>
+
+            <column name="date" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+
+        <sql>
+            INSERT INTO Investor (name, surname, email, phone_number, address, date_of_birth)
+            VALUES ('Ramokgadi', 'Kekae', 'Ramo@example.com', '0813004778', 'Daveyton', '1955-01-15');
+            INSERT INTO Product (name, description, balance, investor_id)
+            VALUES ('RETIREMENT', 'Retirement savings', 500000.00, 1),
+                   ('SAVINGS', 'Regular savings', 36000.00, 1);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
